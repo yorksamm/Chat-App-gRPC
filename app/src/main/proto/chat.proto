@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "edu.stevens.cs522.chat.web.grpc";
+// option java_outer_classname = "HelloWorldProto";
+// option objc_class_prefix = "HLW";
+
+import "google/protobuf/empty.proto";
+
+message Location {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message RegistrationRequest {
+    optional Location location = 1;
+}
+
+// Streaming upload includes client version counter as first item. UGLY!
+message SyncRequest {
+    int64 version = 1;
+    optional Location location = 2;
+}
+
+message Chatroom {
+    string name = 1;
+}
+
+message Message {
+    int64 id = 1;
+    string chatroom = 2;
+    string messageText = 3;
+    int64 seqNum = 4;
+    string appID = 5;
+    string timestamp = 6;
+    double longitude = 7;
+    double latitude = 8;
+    string sender = 9;
+}
+
+message Peer {
+    string name = 2;
+    string timestamp = 3;
+    double longitude = 7;
+    double latitude = 8;
+}
+
+message UploadItem {
+    oneof item {
+        SyncRequest request = 1;
+        Chatroom chatroom = 2;
+        Message message = 3;
+    }
+}
+
+message DownloadItem {
+    oneof item {
+        Chatroom chatroom = 1;
+        Peer peer = 2;
+        Message message = 3;
+    }
+}
+
+service ChatService {
+
+    rpc register (RegistrationRequest) returns (google.protobuf.Empty);
+
+    rpc sync (stream UploadItem) returns (stream DownloadItem);
+
+}
